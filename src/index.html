@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Omer's Url Shortener</title>
+    <link rel="stylesheet" href="index.css">
+    <script src="https://unpkg.com/validator@latest/validator.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="./index.js" defer></script>
+</head>
+<body>
+    <nav id="navbar">
+        <button id="homeBtn">Home</button>
+        <button id="statsBtn">Stats</button>
+    </nav>
+    <h1 id="title">Omer's URL Shortener</h1>
+    <div id="inputsect">
+        <input id="userInput"type="text" placeholder="Enter Long URL Address">
+        <input type="text" id="customUrl" placeholder="Enter wanted abbreviation">
+        <button id="inputbtn">Click</button>
+        <div id="output">
+            <label for="" id="urloutput"></label>
+        </div>
+    </div>
+
+
+    <div id= "stats">
+        <input type="text" id="shortUrlinput">
+        <button id="showstatsBtn">Show Stats</button>
+    </div>
+    
+</body>
+</html>
