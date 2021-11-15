@@ -1,56 +1,55 @@
 const fs = require("fs");
-class DataBase {
-    constructor(){}
-    storeUrlRelation(longUrl, shortUrl){
-        if(shortUrl == undefined){return}      
-       fs.readFile("./DB.json", (err, data)=>{
-           if(err){
-                return(err);
-           }
-           const fileContent = JSON.parse(data);
-           fileContent[shortUrl] = {longUrl: longUrl , date: new Date().toISOString().slice(0, 10).replace('T', ' '), counter: 0};      
-           fs.writeFileSync("./DB.json", JSON.stringify(fileContent));
-       })
+const {User, Registration} = require('./userSchema');
+
+async function storeUrlRelation(longUrl, shortUrl , userName , password){
+    const userData = {
+        userName: userName,
+        password: password,
+        shortUrl: shortUrl,
+        longUrl: longUrl,
+        date: new Date(),
+        counter: 0
     }
-    isDuplicate(shortUrl){
-        const data = fs.readFileSync('./DB.json');;
-        const fileContent = JSON.parse(data);
-        if(fileContent[shortUrl]){
-            return true;
-        }
-        return false;
-    }
-    isExistLong(longUrl){
-        const data = fs.readFileSync('./DB.json');;
-        const fileContent = JSON.parse(data);
-        for (let shortUrl in fileContent){
-            if(fileContent[shortUrl].longUrl == longUrl){
-                return shortUrl;
-            }
-        }
-        return false;
-    }
-    
-    getLongUrlFromStorage(shortUrl){
-        const data = fs.readFileSync("./DB.json")
-        const fileContent = JSON.parse(data);
-        const slicedURL = (shortUrl.slice(1));          
-        fileContent[slicedURL].counter += 1;
-        const toSend = JSON.stringify(fileContent);
-        fs.writeFileSync("./DB.json", toSend)
-        const LongUrl = fileContent[slicedURL].longUrl;
-        return LongUrl;
-    }
-    getDateFromStorage(shortUrl){
-            const data = fs.readFileSync("./DB.json")
-            const fileContent = JSON.parse(data);
-            return fileContent[shortUrl].date;
-            
-    }
-    getCounterFromStorage(shortUrl){
-        const data = fs.readFileSync("./DB.json")
-            const fileContent = JSON.parse(data);
-            return fileContent[shortUrl].counter;
-    }
+   await User.insertMany(userData)
+   return
 }
-module.exports = DataBase;
+async function isDuplicate(shortUrl){
+        const data = await User.findOne({shortUrl: shortUrl});
+        if(data) return true
+        else return false;
+}
+async function isExistLong(longUrl){
+        const data= await User.findOne({longUrl:longUrl});
+        if(data) return data.shortUrl;
+        else return false;
+   
+}
+
+async function getLongUrlFromStorage(shortUrl){
+   const data =  await User.findOne({shortUrl:shortUrl})
+    return data.longUrl
+}
+async function getDateFromStorage(shortUrl){
+    const data =  await User.findOne({shortUrl:shortUrl});
+    return data.date;
+}
+async function getCounterFromStorage(shortUrl){
+    const data =  await User.findOne({shortUrl:shortUrl});
+    return data.counter;
+}
+async function updateCounter(shortUrl){
+    const data =  await User.updateOne({shortUrl:shortUrl}, {$inc:{counter:1}});
+    return;
+}
+
+async function isRegistered(userName,password){
+    const data = await Registration.findOne({userName:userName});
+    if(data && data.password === password) return true;
+    return false;
+}
+async function createRegister(userName, password){
+    const data = {userName, password}
+    await Registration.insertMany(data);
+    return;
+}
+module.exports = {isRegistered,createRegister, getLongUrlFromStorage, getCounterFromStorage, getDateFromStorage, isExistLong, isDuplicate, storeUrlRelation, updateCounter};
