@@ -15,23 +15,7 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname,'./src')));
 
-app.use("/", async (req,res, next)=>{ //responsible for rerouting using the short url 
-  if(req. _parsedUrl.path === "/" || req. _parsedUrl.path === "/makeUrl" || req. _parsedUrl.path === "/status"){next()}
-  else{
-    try {
-      const requestEnd = (req. _parsedUrl.path).slice(1);
-      const longURL = await getLongUrlFromStorage(requestEnd);
-      updateCounter(requestEnd);
-      res.redirect(longURL);
-    } catch (error) {
-      res.send(error);
-    }
-  }
-})
 
-app.get("/", (req, res, next) => { //load home page
-  res.sendFile(__dirname + "/src/index.html");
-});
 
 
 app.get("/makeurl", async function(req,res){ //responsible for creating short url and adding to DB
@@ -53,9 +37,9 @@ app.get("/makeurl", async function(req,res){ //responsible for creating short ur
       res.send(homeUrl + "/" + existingUrl);
     }
     else{
-    const shortUrl = shortid.generate();
-    storeUrlRelation(longUrl, shortUrl,"q","q");
-    res.send(homeUrl + "/" + shortUrl);
+      const shortUrl = shortid.generate();
+      storeUrlRelation(longUrl, shortUrl,"q","q");
+      res.send(homeUrl + "/" + shortUrl);
     }
   } catch (error) {
     res.send(error)
@@ -81,19 +65,35 @@ app.post('/signUp',async(req,res)=>{
   try {
     const {userName,password} = req.body;
     await createRegister(userName,password);
-    res.end();
+    res.send('');
   } catch (error) {
-    res.send(error);
+    res.json(error);
   }
 })
 app.put('/signIn', async (req,res)=>{
-    const {userName,password} = req.body;
-    const response = await isRegistered(userName,password);
-    if(response){
-      const token = jwt.sign({data:password},process.env.SECRET, {expiresIn: '600s'})
-      res.cookie('token',token,{expires:new Date(2025,1,1)})
-      return
-    }
-    return res.send('failed')
+  const {userName,password} = req.body;
+  const response = await isRegistered(userName,password);
+  if(response){
+    const token = jwt.sign({data:password},process.env.SECRET, {expiresIn: '600s'})
+    res.cookie('token',token,{expires:new Date(2025,1,1)})
+    return res.send('');
+  }
+  return res.send('User Does not Exist in DB')
 })
+app.use("/", async (req,res, next)=>{ //responsible for rerouting using the short url 
+  if(req. _parsedUrl.path === "/" ){next()}
+  else{
+    try {
+      const requestEnd = (req. _parsedUrl.path).slice(1);
+      const longURL = await getLongUrlFromStorage(requestEnd);
+      updateCounter(requestEnd);
+      res.redirect(longURL);
+    } catch (error) {
+      res.send(error);
+    }
+  }
+})
+app.get("/", (req, res, next) => { //load home page
+  res.sendFile(__dirname + "/src/index.html");
+});
 module.exports = app;

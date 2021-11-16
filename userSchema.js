@@ -19,9 +19,13 @@ const User = mongoose.model('UrlUser', UsersSchema);
 const RegistrationSchema = mongoose.Schema({
     userName:{
         type:String,
-        unique: true
+        unique: true,
+        require: true
     },
-    password: String
+    password:{
+        type:String,
+        require: true  
+    }
 })
 const Registration = mongoose.model('registration', RegistrationSchema)
 module.exports = {User, Registration};
